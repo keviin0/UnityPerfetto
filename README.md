@@ -11,7 +11,7 @@
 * Decoupled design with provided `PerfettoTraceManager` to prevent populating codebase with messy ad hoc benchmarking code 🧹 
 * Easily attach metadata to any event with `PerfettoDictionary` 🏷️  
 * Multithreaded to avoid overhead from writing to file ⚡️
-* Protobuf serialized (native to Perfetto meaning more robust extensible functionality and 50%+ smaller than JSON) 📦
+* Protobuf serialized (native to Perfetto meaning robust extensibility and 50%+ smaller than JSON) 📦
 <img src="assets/diagram.jpg">
 
 
