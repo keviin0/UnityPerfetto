@@ -19,13 +19,14 @@
 
 ## How it works 🔧
 
-1. Create your own trace manager by inheriting from `PerfettoTraceManager` (this class manages the lifespan of `ProtoWriter` which is a singleton that handles serialization of your data).  
-2. Expose your data through callbacks (e.g., `UnityEvent` and `UnityAction`) and register them in a `override` of `PerfettoTraceManager`'s abstract `ExtendInit()` method and unregister them in an `override` of `PerfettoTraceManager`'s abstract `ExtendEnd()` method.  
-3. Currently, **UnityPerfetto** is only designed to visualize a single stream of info per publisher. For any data you would like visualized,
+1. Download the `.unitypackage` file from releases and import it into your Unity Project
+2. Create your own trace manager by inheriting from `PerfettoTraceManager` (this class manages the lifespan of `ProtoWriter` which is a singleton that handles serialization of your data).  
+3. Expose your data through callbacks (e.g., `UnityEvent` and `UnityAction`) and register them in a `override` of `PerfettoTraceManager`'s abstract `ExtendInit()` method and unregister them in an `override` of `PerfettoTraceManager`'s abstract `ExtendEnd()` method.  
+4. Currently, **UnityPerfetto** is only designed to visualize a single stream of info per publisher. For any data you would like visualized,
    choose between creating a:  
     1. **Slice Publisher** (Visualizes an interval of time. Useful for identifying states) ⏳  
     2. **Counter Publisher** (Visualizes an instantaneous value. Useful for identifying magnitudes of values) 📉  
-4. After steps 1-3, your class might look like this:  
+5. After steps 1-3, your class might look like this:  
 
 ```csharp
 using UnityEngine.Events;
