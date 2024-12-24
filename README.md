@@ -1,4 +1,4 @@
-# UnityPerfetto 🚀
+# UnityPerfetto
 
 **UnityPerfetto** is a lightweight, performant C# Unity to [Perfetto](https://perfetto.dev/) util library for your tracing needs.  
 ✨ Features:  
