@@ -1,7 +1,10 @@
 # UnityPerfetto
 
 **UnityPerfetto** is a lightweight, performant C# Unity to [Perfetto](https://perfetto.dev/) util library for your tracing needs.
+
+<br />
 <img src="assets/example.jpg">
+
 ## Features ✨:  
 * Leverage all of Perfetto's built in tooling (SQL querying, large trace analysis, and more) 🛠️
 * Clear visually grouped **Publishers**, which can visualize data through **Slices** (intervals of time) ⏳ and/or **Counters** (instantaneous) 📉  
