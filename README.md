@@ -12,7 +12,7 @@
 
 1. Create your own trace manager by inheriting from `PerfettoTraceManager` (this class manages the lifespan
    of `ProtoWriter` which is a singleton that handles serialization of your data)
-2. Expose your data through callbacks (e.g. UnityEvent and UnityAction) and register them in a `override` of
+2. Expose your data through callbacks (e.g. `UnityEvent` and `UnityAction`) and register them in a `override` of
    `PerfettoTraceManager`'s abstract `ExtendInit` method and unregister them in an `override` of `PerfettoTraceManager`'s abstract
    `ExtendEnd()` method.
 3. Currently, **UnityPerfetto** is only designed to visualize a single stream of info per publisher, so for any data you would like visualized,
@@ -20,10 +20,10 @@
     1. Slice (Visualizes an interval of time. Useful for identifying states)
     2. Counter (Visualizes an instantaneous value. Useful for identifying magnitudes of values)
 4. After steps 1-3, you should have a class that looks like
+```csharp
 using UnityEngine.Events;
 using UnityPerfetto;
 using UnityPerfetto.Protos;
-```csharp
 public class ProtoBasketballBenchmarkManager : PerfettoTraceManager
 {
     private UnityAction<ShotManager.ShotState> _onShotStateChange;
@@ -73,6 +73,7 @@ public class ProtoBasketballBenchmarkManager : PerfettoTraceManager
         shotManager.onShotStateChange.RemoveAllListeners();
         shotManager.onShotCharging.RemoveAllListeners();
     }
+}
 ```
 5. Only one value for any publisher can actually be visualized, so in the case of `_onShotReleased` as seen above, you can package
    additional metadata information in with the help of `PerfettoDictionary`. In this example, `basketballYPos` is visualized, and
@@ -88,8 +89,9 @@ private void HandleShotReleased(float basketballYPos, float gravityScale)
     _shotReleasedInfoPublisher.LogCounterEvent(_shotAnglePublisher.GetTimeStamp(), basketballYPos, dict);
 }
 ```
-6. Note that for SlicePublishers (which correspond to [Thread Scoped Slices](https://perfetto.dev/docs/reference/synthetic-track-event#thread-scoped-sync-slices)),
-   any additional events published must nest properly. In other words, any events published after an event must end before the original event ends.
+6. Note that for `SlicePublisher`'s (which correspond to [Thread Scoped Slices](https://perfetto.dev/docs/reference/synthetic-track-event#thread-scoped-sync-slices)),
+   any additional events published must nest properly. In other words, any events published after an event must end before the original
+   event ends (No partial overlap of events).
 ```csharp
 private void HandleShotStateChange(ShotManager.ShotState newState)
 {
