@@ -1,29 +1,30 @@
-# UnityPerfetto
+# UnityPerfetto 🚀
 
-**UnityPerfetto** is a lightweight, performant C# Unity to [Perfetto](https://perfetto.dev/) util library for your tracing needs.
-* Grouped **Publishers**
-* Visualize **Slices** (intervals of time) & **Counters** (instantaneous)
-* Decoupled callback registration with provided `PerfettoTraceManager`
-* Easily attach metadata to any event with `PerfettoDictionary`
-* Multithreaded to avoid overhead from writing to file
+**UnityPerfetto** is a lightweight, performant C# Unity to [Perfetto](https://perfetto.dev/) util library for your tracing needs.  
+✨ Features:  
+* Clearly grouped **Publishers**, which can visualize **Slices** (intervals of time) ⏳ & **Counters** (instantaneous) 📉  
+* Decoupled design with provided `PerfettoTraceManager` to prevent populating codebase with messy ad hoc benchmarking code 🧹 
+* Easily attach metadata to any event with `PerfettoDictionary` 🏷️  
+* Multithreaded to avoid overhead from writing to file ⚡️  
+
 <img src="assets/example.jpg">
 
-## How it works
+---
 
-1. Create your own trace manager by inheriting from `PerfettoTraceManager` (this class manages the lifespan
-   of `ProtoWriter` which is a singleton that handles serialization of your data)
-2. Expose your data through callbacks (e.g. `UnityEvent` and `UnityAction`) and register them in a `override` of
-   `PerfettoTraceManager`'s abstract `ExtendInit` method and unregister them in an `override` of `PerfettoTraceManager`'s abstract
-   `ExtendEnd()` method.
-3. Currently, **UnityPerfetto** is only designed to visualize a single stream of info per publisher, so for any data you would like visualized,
-   create the respective publisher (with arguments `name`, `group`)according to the type of visualization you require:
-    1. Slice (Visualizes an interval of time. Useful for identifying states)
-    2. Counter (Visualizes an instantaneous value. Useful for identifying magnitudes of values)
-4. After steps 1-3, you should have a class that looks like
+## How it works 🔧
+
+1. Create your own trace manager by inheriting from `PerfettoTraceManager` (this class manages the lifespan of `ProtoWriter` which is a singleton that handles serialization of your data).  
+2. Expose your data through callbacks (e.g., `UnityEvent` and `UnityAction`) and register them in a `override` of `PerfettoTraceManager`'s abstract `ExtendInit` method and unregister them in an `override` of `PerfettoTraceManager`'s abstract `ExtendEnd()` method.  
+3. Currently, **UnityPerfetto** is only designed to visualize a single stream of info per publisher. For any data you would like visualized:  
+    1. Create a **Slice Publisher** (Visualizes an interval of time. Useful for identifying states) ⏳  
+    2. Create a **Counter Publisher** (Visualizes an instantaneous value. Useful for identifying magnitudes of values) 📉  
+4. After steps 1-3, your class might look like this:  
+
 ```csharp
 using UnityEngine.Events;
 using UnityPerfetto;
 using UnityPerfetto.Protos;
+
 public class ProtoBasketballBenchmarkManager : PerfettoTraceManager
 {
     private UnityAction<ShotManager.ShotState> _onShotStateChange;
@@ -40,8 +41,7 @@ public class ProtoBasketballBenchmarkManager : PerfettoTraceManager
     {
         _onShotStateChange = (ShotManager.ShotState data) =>
         {
-            HandleShotStateChange(data); // I recommend passing your data into a helper method to 
-                                         // prevent bloat (especially when packaging additional metadata)
+            HandleShotStateChange(data);
         };
 
         _onShotCharging = (float shotAngle) =>
@@ -54,15 +54,10 @@ public class ProtoBasketballBenchmarkManager : PerfettoTraceManager
             HandleShotReleased(basketballYPos, gravityScale);
         };
 
-        // Register publishers using the appropriate publisher type
         _shotStatePublisher = PerfettoPublisherFactory.Instance.CreateSlicePublisher("Shot State", "Player");
         _shotAnglePublisher = PerfettoPublisherFactory.Instance.CreateCounterPublisher("Shot Angle", "Player");
-        _shotReleasedInfoPublisher = PerfettoPublisherFactory.Instance.CreateCounterPublisher(
-                                            "Shot Release Info",
-                                            "Basketball"
-                                     );
+        _shotReleasedInfoPublisher = PerfettoPublisherFactory.Instance.CreateCounterPublisher("Shot Release Info", "Basketball");
 
-        // Add listeners to the ShotManager events
         shotManager.onShotStateChange.AddListener(_onShotStateChange);
         shotManager.onShotCharging.AddListener(_onShotCharging);
         shotManager.onShotReleased.AddListener(_onShotReleased);
@@ -75,13 +70,17 @@ public class ProtoBasketballBenchmarkManager : PerfettoTraceManager
     }
 }
 ```
-5. Only one value for any publisher can actually be visualized, so in the case of `_onShotReleased` as seen above, you can package
-   additional metadata information in with the help of `PerfettoDictionary`. In this example, `basketballYPos` is visualized, and
-   all the additional information populated in `dict` can be seen by clicking on any data point from this publisher in Perfetto's UI.
+
+---
+
+### Adding Metadata 🔍
+
+Package additional metadata using `PerfettoDictionary`.  
+Example (see screenshot above for visual result):  
+
 ```csharp
 private void HandleShotReleased(float basketballYPos, float gravityScale)
 {
-    // Log the basketball height and associated gravity scale, along with some other categorized verbose info
     PerfettoDictionary dict = new PerfettoDictionary();
     dict["grav_scale"] = gravityScale;
     dict["more info", "basketball_name"] = "Larry";
@@ -89,13 +88,16 @@ private void HandleShotReleased(float basketballYPos, float gravityScale)
     _shotReleasedInfoPublisher.LogCounterEvent(_shotAnglePublisher.GetTimeStamp(), basketballYPos, dict);
 }
 ```
-6. Note that for `SlicePublisher`'s (which correspond to [Thread Scoped Slices](https://perfetto.dev/docs/reference/synthetic-track-event#thread-scoped-sync-slices)),
-   any additional events published must nest properly. In other words, any events published after an event must end before the original
-   event ends (No partial overlap of events).
+
+---
+
+### Nesting Events Properly
+
+For `SlicePublisher`s, events must nest properly (meaning no partial overlap between events). Events are ended from most recent to oldest
+(from when the event was started):  
 ```csharp
 private void HandleShotStateChange(ShotManager.ShotState newState)
 {
-    // End previous duration event if this is not the first state logged
     if (_isFirstStateLogged)
     {
         _shotStatePublisher.LogEndEvent(_shotStatePublisher.GetTimeStamp());
@@ -105,16 +107,20 @@ private void HandleShotStateChange(ShotManager.ShotState newState)
         _isFirstStateLogged = true;
     }
 
-    // Start a new duration event for the current state
     _shotStatePublisher.LogStartEvent(newState.ToString(), "player_info", _shotStatePublisher.GetTimeStamp());
-
     prevShotState = newState;
 }
 ```
-7. Now, just add the new BenchmarkManager script you've created to any GameObject, enable it as you see fit, and when your game exits,
-   open up the generated *.pb file in [Perfetto's UI](https://ui.perfetto.dev/#!/info) and profit!
 
-## Example PerfettoTraceManager
+---
+
+### Bringing It All Together 🎮
+
+1. Add your new `BenchmarkManager` script to any GameObject.  
+2. Enable it as needed.  
+3. When your game exits, open the generated `.pb` file in [Perfetto's UI](https://ui.perfetto.dev/#!/info) and profit! 💰
+
+### Full Example
 ```csharp
 using System;
 using UnityEngine.Events;
@@ -208,3 +214,5 @@ public class ProtoBasketballBenchmarkManager : PerfettoTraceManager
     }
 }
 ```
+
+Happy tracing! 🎉  
