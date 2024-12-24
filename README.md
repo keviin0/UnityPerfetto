@@ -60,9 +60,15 @@ public class ProtoBasketballBenchmarkManager : PerfettoTraceManager
             HandleShotReleased(basketballYPos, gravityScale);
         };
 
-        _shotStatePublisher = PerfettoPublisherFactory.Instance.CreateSlicePublisher("Shot State", "Player");
-        _shotAnglePublisher = PerfettoPublisherFactory.Instance.CreateCounterPublisher("Shot Angle", "Player");
-        _shotReleasedInfoPublisher = PerfettoPublisherFactory.Instance.CreateCounterPublisher("Shot Release Info", "Basketball");
+        _shotStatePublisher = PerfettoPublisherFactory.Instance.CreateSlicePublisher(
+                                        "Shot State",
+                                        "Player");
+        _shotAnglePublisher = PerfettoPublisherFactory.Instance.CreateCounterPublisher(
+                                        "Shot Angle",
+                                        "Player");
+        _shotReleasedInfoPublisher = PerfettoPublisherFactory.Instance.CreateCounterPublisher(
+                                        "Shot Release Info",
+                                        "Basketball");
 
         shotManager.onShotStateChange.AddListener(_onShotStateChange);
         shotManager.onShotCharging.AddListener(_onShotCharging);
@@ -166,8 +172,12 @@ public class ProtoBasketballBenchmarkManager : PerfettoTraceManager
         };
 
         // Register publishers using the appropriate publisher type
-        _shotStatePublisher = PerfettoPublisherFactory.Instance.CreateSlicePublisher("Shot State", "Player");
-        _shotAnglePublisher = PerfettoPublisherFactory.Instance.CreateCounterPublisher("Shot Angle", "Player");
+        _shotStatePublisher = PerfettoPublisherFactory.Instance.CreateSlicePublisher(
+                                            "Shot State",
+                                            "Player");
+        _shotAnglePublisher = PerfettoPublisherFactory.Instance.CreateCounterPublisher(
+                                            "Shot Angle",
+                                            "Player");
         _shotReleasedInfoPublisher = PerfettoPublisherFactory.Instance.CreateCounterPublisher(
                                             "Shot Release Info",
                                             "Basketball"
@@ -201,7 +211,9 @@ public class ProtoBasketballBenchmarkManager : PerfettoTraceManager
         }
 
         // Start a new duration event for the current state
-        _shotStatePublisher.LogStartEvent(newState.ToString(), "player_info", _shotStatePublisher.GetTimeStamp());
+        _shotStatePublisher.LogStartEvent(newState.ToString(),
+                                          "player_info",
+                                          _shotStatePublisher.GetTimeStamp());
 
         prevShotState = newState;
     }
@@ -214,12 +226,14 @@ public class ProtoBasketballBenchmarkManager : PerfettoTraceManager
 
     private void HandleShotReleased(float basketballYPos, float gravityScale)
     {
-        // Log the basketball height and associated gravity scale, along with some other categorized verbose info
+        // Log the basketball height and associated gravity scale, along with some other
+        // categorized verbose info
         PerfettoDictionary dict = new PerfettoDictionary();
         dict["grav_scale"] = gravityScale;
         dict["more info", "basketball_name"] = "Larry";
         dict["more info", "age"] = "10";
-        _shotReleasedInfoPublisher.LogCounterEvent(_shotAnglePublisher.GetTimeStamp(), basketballYPos, dict);
+        _shotReleasedInfoPublisher.LogCounterEvent(_shotAnglePublisher.GetTimeStamp(),
+                                                   basketballYPos, dict);
     }
 }
 ```
