@@ -25,7 +25,7 @@
    choose between creating a:  
     1. **Slice Publisher** (Visualizes an interval of time. Useful for identifying states) ⏳  
     2. **Counter Publisher** (Visualizes an instantaneous value. Useful for identifying magnitudes of values) 📉  
-5. After steps 1-3, your class might look like this:  
+4. After steps 1-3, your class might look like this:  
 
 ```csharp
 using UnityEngine.Events;
@@ -83,6 +83,17 @@ public class ProtoBasketballBenchmarkManager : PerfettoTraceManager
     }
 }
 ```
+5. To log data out, just call the respective LogEvent method for your publisher:
+    1. `LogStartEvent(string eventName, string categories, double timestamp)` or `LogEndEvent(double timestamp)` for **Slice Publisher**
+       ```csharp
+       _shotStatePublisher.LogStartEvent(newState.ToString(), "player_info", _shotStatePublisher.GetTimeStamp());
+       ```
+    2. `LogCounterEvent`(double timestamp, double value) for **Counter Publisher**
+       ```csharp
+       _shotAnglePublisher.LogCounterEvent(_shotAnglePublisher.GetTimeStamp(), shotAngle);
+       ```
+6. (Optional) Both `LogStartEvent` and `LogCounterEvent` have an additional optional argument `args` which can take in a `PerfettoDictionary`
+   for additional non visualized metadata.
 
 ---
 
