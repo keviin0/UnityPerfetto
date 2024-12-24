@@ -89,7 +89,7 @@ public class ProtoBasketballBenchmarkManager : PerfettoTraceManager
        ```csharp
        _shotStatePublisher.LogStartEvent(newState.ToString(), "player_info", _shotStatePublisher.GetTimeStamp());
        ```
-    2. `LogCounterEvent`(double timestamp, double value) for **Counter Publisher**
+    2. `LogCounterEvent(double timestamp, double value)` for **Counter Publisher**
        ```csharp
        _shotAnglePublisher.LogCounterEvent(_shotAnglePublisher.GetTimeStamp(), shotAngle);
        ```
