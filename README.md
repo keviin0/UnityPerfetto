@@ -207,6 +207,7 @@ public class ProtoBasketballBenchmarkManager : PerfettoTraceManager
     {
         shotManager.onShotStateChange.RemoveAllListeners();
         shotManager.onShotCharging.RemoveAllListeners();
+        shotManager.onShotReleased.RemoveAllListeners();
     }
 
     private bool _isFirstStateLogged = false;
