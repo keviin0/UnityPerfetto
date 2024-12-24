@@ -120,6 +120,9 @@ private void HandleShotStateChange(ShotManager.ShotState newState)
 1. Add your new `BenchmarkManager` script to any GameObject.  
 2. Enable it as needed.  
 3. When your game exits, open the generated `.pb` file in [Perfetto's UI](https://ui.perfetto.dev/#!/info) and profit! 💰
+4. (Optional) If you want a human readable version of your output, look into using [Perfetto's trace conversion tool](https://perfetto.dev/docs/quickstart/traceconv)
+
+---
 
 ### Full Example
 ```csharp
