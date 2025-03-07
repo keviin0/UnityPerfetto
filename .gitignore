@@ -1,2 +1,5 @@
 *.proto
 *.meta
+src/BenchmarkManager.cs
+src/BenchmarkConstants.cs
+src/StateLogger.cs
