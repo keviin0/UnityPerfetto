@@ -29,13 +29,15 @@ namespace UnityPerfetto
         public ulong track_uuid;
         public uint trusted_packet_sequence_id;
         public string name;
+        public string filename;
 
-        protected TrackPublisher(int pid, ulong parent_uuid, ulong track_uuid, string name)
+        protected TrackPublisher(int pid, ulong parent_uuid, ulong track_uuid, string name, string filename)
         {
             this.pid = pid;
             this.parent_uuid = parent_uuid;
             this.track_uuid = track_uuid;
             this.name = name;
+            this.filename = filename;
             this.trusted_packet_sequence_id = PerfettoPublisherFactory.GenerateRandomUInt32();
         }
 
@@ -49,12 +51,13 @@ namespace UnityPerfetto
 
     public class SlicePublisher : TrackPublisher
     {
-        public SlicePublisher(int pid, ulong parent_uuid, ulong track_uuid, string name)
-            : base(pid, parent_uuid, track_uuid, name) { }
+        public SlicePublisher(int pid, ulong parent_uuid, ulong track_uuid, string name, string filename)
+            : base(pid, parent_uuid, track_uuid, name, filename) { }
 
         public void LogStartEvent(string eventName, string categories, double timestamp, PerfettoDictionary args = null)
         {
-            ProtoWriter.Instance.LogEvent(track_uuid,
+            ProtoWriter.Instance.LogEvent(filename, 
+                                          track_uuid,
                                           trusted_packet_sequence_id,
                                           eventName, 
                                           categories, 
@@ -65,7 +68,8 @@ namespace UnityPerfetto
 
         public void LogEndEvent(double timestamp, PerfettoDictionary args = null)
         {
-            ProtoWriter.Instance.LogEvent(track_uuid,
+            ProtoWriter.Instance.LogEvent(filename,
+                                          track_uuid,
                                           trusted_packet_sequence_id, 
                                           null, 
                                           null, 
@@ -76,7 +80,8 @@ namespace UnityPerfetto
 
         public override void LogMetadata(ulong track_uuid, string name, int parent_pid, ulong parent_uuid)
         {
-            ProtoWriter.Instance.LogPublisherMetadata(ProtoWriter.TrackTypes.Slice,
+            ProtoWriter.Instance.LogPublisherMetadata(filename,
+                                                      ProtoWriter.TrackTypes.Slice,
                                                       track_uuid,
                                                       name,
                                                       parent_pid: parent_pid);
@@ -85,12 +90,13 @@ namespace UnityPerfetto
 
     public class CounterPublisher : TrackPublisher
     {
-        public CounterPublisher(int pid, ulong parent_uuid, ulong track_uuid, string name)
-            : base(pid, parent_uuid, track_uuid, name) { }
+        public CounterPublisher(int pid, ulong parent_uuid, ulong track_uuid, string name, string filename)
+            : base(pid, parent_uuid, track_uuid, name, filename) { }
 
         public void LogCounterEvent(double timestamp, double value, PerfettoDictionary args = null)
         {
-            ProtoWriter.Instance.LogEvent(track_uuid,
+            ProtoWriter.Instance.LogEvent(filename,
+                                          track_uuid,
                                           trusted_packet_sequence_id, 
                                           name, 
                                           null, 
@@ -102,7 +108,8 @@ namespace UnityPerfetto
 
         public override void LogMetadata(ulong track_uuid, string name, int parent_pid, ulong parent_uuid)
         {
-            ProtoWriter.Instance.LogPublisherMetadata(ProtoWriter.TrackTypes.Counter,
+            ProtoWriter.Instance.LogPublisherMetadata(filename,
+                                                      ProtoWriter.TrackTypes.Counter,
                                                       track_uuid,
                                                       name,
                                                       parent_uuid: parent_uuid);
@@ -137,32 +144,33 @@ namespace UnityPerfetto
             }
         }
 
-        public SlicePublisher CreateSlicePublisher(string name, string group = "")
+        public SlicePublisher CreateSlicePublisher(string filename, string name, string group = "")
         {
-            return RegisterTrackEntity<SlicePublisher>(group + '/' + name);
+            return RegisterTrackEntity<SlicePublisher>(filename + '/' + group + '/' + name);
         }
 
-        public CounterPublisher CreateCounterPublisher(string name, string group = "")
+        public CounterPublisher CreateCounterPublisher(string filename, string name, string group = "")
         {
-            return RegisterTrackEntity<CounterPublisher>(group + '/' + name);
+            return RegisterTrackEntity<CounterPublisher>(filename + '/' + group + '/' + name);
         }
 
         private T RegisterTrackEntity<T>(string name) where T : TrackPublisher 
         {
             string[] parts = name.Split('/');
-            if (parts.Length != 2)
+            if (parts.Length != 3)
             {
-                throw new ArgumentException("Invalid name format. Use 'Group/Publisher'.");
+                throw new ArgumentException("Invalid name format. Use 'Filename/Group/Publisher'.");
             }
 
-            string groupName = (parts[0] == "") ? "Global group (Default)" : parts[0];
-            string pubName = parts[1];
+            string fileName = parts[0];
+            string groupName = (parts[1] == "") ? "Global group (Default)" : parts[1];
+            string pubName = parts[2];
 
             if (!_trackGroups.TryGetValue(groupName, out var group))
             {
                 group = new TrackGroup(_nextAvailablePid++, GenerateRandomUInt64(), groupName);
                 _trackGroups[groupName] = group;
-                ProtoWriter.Instance.LogGroupMetadata(group.pid, group.uuid, group.name);
+                ProtoWriter.Instance.LogGroupMetadata(fileName, group.pid, group.uuid, group.name);
             }
 
             if (group.trackPublishers.ContainsKey(pubName))
@@ -176,7 +184,8 @@ namespace UnityPerfetto
                 group.pid,
                 group.uuid,
                 track_uuid,
-                pubName
+                pubName,
+                fileName
             );
 
             trackPub.LogMetadata(trackPub.track_uuid, pubName, group.pid, group.uuid);
@@ -206,4 +215,14 @@ namespace UnityPerfetto
             }
         }
     }
+
+
+    public static class HelperFunctions
+    {
+        public static void UpdateTimeStamp()
+        {
+            ProtoWriter.Instance.UpdateTimeStamp();
+        }
+    }
+    
 } // namespace UnityPerfetto

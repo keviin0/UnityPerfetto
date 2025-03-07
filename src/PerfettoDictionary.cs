@@ -14,9 +14,11 @@ namespace UnityPerfetto
         const int STARTING_INDENT_LEVEL = 3;
         // Type safety since key should always be a string for it to be properly parsed as a JSON
         private Dictionary<string, object> _entries;
+        public string argsName;
 
-        public PerfettoDictionary()
+        public PerfettoDictionary(string name = "args")
         {
+            argsName = name;
             _entries = new Dictionary<string, object>();
         }
 
