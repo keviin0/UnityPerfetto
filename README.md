@@ -4,6 +4,8 @@
 
 Demo project included in repo uses [TaroDev's 2D PlayerController](https://github.com/Matthew-J-Spencer/Ultimate-2D-Controller) (different from example below)
 
+**Leave a ⭐ if you found this tool helpful!**
+
 <br />
 <img src="assets/example.jpg">
 
