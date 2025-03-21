@@ -2,6 +2,8 @@
 
 **UnityPerfetto** is a lightweight, performant C# Unity to [Perfetto](https://perfetto.dev/) util library for your tracing needs.
 
+Demo project included in repo uses [TaroDev's 2D PlayerController](https://github.com/Matthew-J-Spencer/Ultimate-2D-Controller) (different from example below)
+
 <br />
 <img src="assets/example.jpg">
 
